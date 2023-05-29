@@ -5,6 +5,7 @@
 First, run the development server:
 
 ```bash
+git clone https://github.com/MrGrel/forkway.git
 npm i
 npm run dev
 

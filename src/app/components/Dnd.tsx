@@ -1,6 +1,6 @@
 "use client";
 import React, { DragEvent, useCallback, useMemo, useState } from 'react';
-// import { ModalWindow } from '../components/modal/ModalWindow';
+import { ModalWindow } from '../components/modal/ModalWindow';
 import {
   Button,
   Card,
@@ -83,12 +83,9 @@ export const Dnd = () => {
   const [isDiveFolder, setIsDiveFolder] = useState<boolean>(false);
   const [diveFolder, setDiveFolder] = useState<ICard | null>(null);
   const [countTimer, setCountTimer] = useState<NodeJS.Timeout | null>(null);
-  // Я впервые работаю с DND, да и с Next в принципе, знал бы что так будет, делал бы через store все
+  const [modalTree, setModalTree] = useState<ICard[][]>([]);
+  const [ModalIndex, setModalIndex] = useState<number>(0);
 
-  // Закомментированный код это недоделанные моадльные окна, позже, я хотел бы для себя полностью выполнить это задание
-  // const [modalTree, setModalTree] = useState<ICard[][]>([]);
-  // const [allModalIndexes, setAllModalIndexes] = useState<number[]>([]);
-  // const lastModalIndex = allModalIndexes[allModalIndexes.length - 1] ?? 10;
 
   const timeToDiveFolder = useCallback(
     (card: ICard, targetStyle: CSSStyleDeclaration) => {
@@ -222,8 +219,8 @@ export const Dnd = () => {
   };
 
   const handleClick = (card: ICard) => {
-    // setAllModalIndexes((state) => [...state, lastModalIndex + 10]);
-    // setModalTree((state) => [...state, [card]]);
+    setModalIndex((state) => state + 10);
+    setModalTree((state) => [...state, [card]]);
   };
 
   const swapCard = (
@@ -388,25 +385,24 @@ export const Dnd = () => {
     );
   }, [currentFolder, currentCard, treeOfCards, isDiveFolder, diveFolder]);
 
-  // const htmlTreeOfModal = useMemo(() => {
-  //   console.log('modalTree.length', modalTree.length);
+  const htmlTreeOfModal = useMemo(() => {
+    console.log('modalTree.length', modalTree.length);
 
-  //   if (modalTree.length === 0) return null;
-  //   return (
-  //     <ModalWindow
-  //       zIndex={lastModalIndex}
-  //       childs={buildCardsTree(modalTree[modalTree.length - 1])}
-  //       removeModal={setModalTree}
-  //       arrayModalIndexes={allModalIndexes}
-  //       reduceLastModalIndex={setAllModalIndexes}
-  //     ></ModalWindow>
-  //   );
-  // }, [modalTree, lastModalIndex]);
+    if (modalTree.length === 0) return null;
+    return (
+      <ModalWindow
+        zIndex={ModalIndex}
+        childs={buildCardsTree(modalTree[modalTree.length - 1])}
+        removeModal={setModalTree}
+        reducingZInex={setModalIndex}
+      ></ModalWindow>
+    );
+  }, [modalTree, ModalIndex]);
 
   return (
     <Container>
       {htmlTreeOfCards}
-      {/* {htmlTreeOfModal !== null && <>{htmlTreeOfModal}</>} */}
+      {htmlTreeOfModal !== null && <>{htmlTreeOfModal}</>}
     </Container>
   );
 };

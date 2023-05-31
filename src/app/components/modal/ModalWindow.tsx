@@ -1,35 +1,38 @@
 import React, { useState } from 'react';
 import { ModalContainer } from './Modal.style';
 import { ICard } from '../Dnd';
+import { log } from 'console';
 
 interface IModal {
   zIndex: number;
   childs: JSX.Element[] | null;
   removeModal: React.Dispatch<React.SetStateAction<ICard[][]>>;
-  arrayModalIndexes: number[];
-  reduceLastModalIndex: React.Dispatch<React.SetStateAction<number[]>>;
+  reducingZInex: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const ModalWindow = ({
   zIndex,
   childs,
   removeModal,
-  arrayModalIndexes,
-  reduceLastModalIndex,
+  reducingZInex,
 }: IModal) => {
   const [countTimer, setCountTimer] = useState<NodeJS.Timeout | null>(null);
   const [isTimerStart, setIsTimerStart] = useState<boolean>(false);
 
-  const lastIndex = arrayModalIndexes[arrayModalIndexes.length - 1];
-
   const handleClick = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ): void => {
-    e.stopPropagation();
 
-    if (lastIndex === zIndex) {
-      removeModal((state) => state.splice(state.length - 1, 1));
-      reduceLastModalIndex((state) => state.splice(state.length - 1, 1));
+    if (e.target === e.currentTarget) {
+      reducingZInex((state) => state - 10);
+
+      removeModal((state) => {
+        if (state.length === 1) {
+          return []
+        }
+        state.splice(state.length - 1, 1);     
+        return state
+      });
     }
   };
 

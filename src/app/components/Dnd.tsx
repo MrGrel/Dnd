@@ -206,9 +206,19 @@ export const Dnd = () => {
         currentFolder?.childrens.splice(currentIndex, 1);
 
         dropIndex = folderForDrop.childrens.indexOf(card);
-        folderForDrop.childrens.splice(dropIndex + 1, 0, currentCard);
+        folderForDrop.childrens.splice(dropIndex, 0, currentCard);
         currentCard.parent_id = folderForDrop.id;
         currentCard.floar = folderForDrop.floar + 1;
+
+        setModalTree(state => {
+          if (state.length === 1) {
+            state = []
+          } else {
+            state.slice(state.length - 1, 1)
+          }
+          
+          return [...state, [folderForDrop] ]
+        })
       }
     }
 
@@ -397,7 +407,7 @@ export const Dnd = () => {
         reducingZInex={setModalIndex}
       ></ModalWindow>
     );
-  }, [modalTree, ModalIndex]);
+  }, [modalTree, ModalIndex, currentFolder, currentCard, treeOfCards, isDiveFolder, diveFolder]);
 
   return (
     <Container>

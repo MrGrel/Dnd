@@ -101,7 +101,7 @@ export const TextContainer = styled.div`
 
 export const Button = styled.button`
   width: 100%;
-  background: #fff;
+  background-color: inherit;
   border: none;
   cursor: pointer;
 `;

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React, { DragEvent, useCallback, useMemo, useState } from 'react';
 import { ModalWindow } from '../components/modal/ModalWindow';
 import {
@@ -12,6 +12,7 @@ import {
   IconContainer,
   TextContainer,
 } from './Card.style';
+import { log } from 'console';
 
 export interface ICard {
   id: number;
@@ -83,9 +84,8 @@ export const Dnd = () => {
   const [isDiveFolder, setIsDiveFolder] = useState<boolean>(false);
   const [diveFolder, setDiveFolder] = useState<ICard | null>(null);
   const [countTimer, setCountTimer] = useState<NodeJS.Timeout | null>(null);
-  const [modalTree, setModalTree] = useState<ICard[][]>([]);
-  const [ModalIndex, setModalIndex] = useState<number>(0);
-
+  const [modalTrees, setModalTrees] = useState<ICard[][]>([]);
+  const [isClose, setIsClose] = useState<boolean>(false);
 
   const timeToDiveFolder = useCallback(
     (card: ICard, targetStyle: CSSStyleDeclaration) => {
@@ -209,16 +209,20 @@ export const Dnd = () => {
         folderForDrop.childrens.splice(dropIndex, 0, currentCard);
         currentCard.parent_id = folderForDrop.id;
         currentCard.floar = folderForDrop.floar + 1;
+      }
+    }
 
-        setModalTree(state => {
-          if (state.length === 1) {
-            state = []
-          } else {
-            state.slice(state.length - 1, 1)
-          }
-          
-          return [...state, [folderForDrop] ]
-        })
+    if (modalTrees.length !== 0) {
+      const lastModalCard = modalTrees[modalTrees.length - 1][0];
+      console.log(modalTrees);
+
+      if (
+        lastModalCard.id === folderForDrop.id ||
+        lastModalCard.id === folderForDrop.parent_id
+      ) {
+        setModalTrees((state) => [...state]);
+      } else {
+        setModalTrees((state) => [...state, [folderForDrop]]);
       }
     }
 
@@ -229,8 +233,7 @@ export const Dnd = () => {
   };
 
   const handleClick = (card: ICard) => {
-    setModalIndex((state) => state + 10);
-    setModalTree((state) => [...state, [card]]);
+    setModalTrees((state) => [...state, [card]]);
   };
 
   const swapCard = (
@@ -393,26 +396,35 @@ export const Dnd = () => {
         {buildCardsTree(treeOfCards.childrens)}
       </FirstCard>
     );
-  }, [currentFolder, currentCard, treeOfCards, isDiveFolder, diveFolder]);
+  }, [currentCard, treeOfCards, isDiveFolder, diveFolder]);
 
   const htmlTreeOfModal = useMemo(() => {
-    console.log('modalTree.length', modalTree.length);
+    console.log('я ща обнов');
 
-    if (modalTree.length === 0) return null;
+    if (modalTrees.length === 0) return null;
     return (
       <ModalWindow
-        zIndex={ModalIndex}
-        childs={buildCardsTree(modalTree[modalTree.length - 1])}
-        removeModal={setModalTree}
-        reducingZInex={setModalIndex}
+        childs={buildCardsTree(modalTrees[modalTrees.length - 1])}
+        modals={modalTrees}
+        removeModal={setModalTrees}
+        modalClose={isClose}
+        setIsClose={setIsClose}
       ></ModalWindow>
     );
-  }, [modalTree, ModalIndex, currentFolder, currentCard, treeOfCards, isDiveFolder, diveFolder]);
+  }, [modalTrees]);
 
   return (
     <Container>
       {htmlTreeOfCards}
-      {htmlTreeOfModal !== null && <>{htmlTreeOfModal}</>}
+      {modalTrees.length !== 0 && (
+        <ModalWindow
+          childs={buildCardsTree(modalTrees[modalTrees.length - 1])}
+          modals={modalTrees}
+          removeModal={setModalTrees}
+          modalClose={isClose}
+          setIsClose={setIsClose}
+        ></ModalWindow>
+      )}
     </Container>
   );
 };

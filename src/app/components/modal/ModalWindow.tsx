@@ -4,51 +4,75 @@ import { ICard } from '../Dnd';
 import { log } from 'console';
 
 interface IModal {
-  zIndex: number;
   childs: JSX.Element[] | null;
+  modals: ICard[][];
   removeModal: React.Dispatch<React.SetStateAction<ICard[][]>>;
-  reducingZInex: React.Dispatch<React.SetStateAction<number>>;
+  modalClose: boolean;
+  setIsClose: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ModalWindow = ({
-  zIndex,
   childs,
+  modals,
   removeModal,
-  reducingZInex,
+  setIsClose,
 }: IModal) => {
   const [countTimer, setCountTimer] = useState<NodeJS.Timeout | null>(null);
-  const [isTimerStart, setIsTimerStart] = useState<boolean>(false);
+  const [isStartTimer, setIsStartTimer] = useState<boolean>(false);
+
+  const startTimer = () => {
+    return setTimeout(() => {
+      console.log('end timer');
+
+      if (modals.length === 1) {
+        removeModal((state) => []);
+      } else {
+        removeModal((state) => {
+          state.splice(state.length - 1, 1);
+          return state;
+        });
+      }
+      setIsClose((state) => !state);
+    }, 2000);
+  };
 
   const handleClick = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ): void => {
-
     if (e.target === e.currentTarget) {
-      reducingZInex((state) => state - 10);
-
-      removeModal((state) => {
-        if (state.length === 1) {
-          return []
-        }
-        state.splice(state.length - 1, 1);     
-        return state
-      });
+      if (modals.length === 1) {
+        removeModal((state) => []);
+      } else {
+        removeModal((state) => {
+          state.splice(state.length - 1, 1);
+          return state;
+        });
+      }
+      setIsClose((state) => !state);
+    }
+  };
+  const dragOverHandler = (e: React.DragEvent<HTMLDivElement>): void => {
+    if (e.target === e.currentTarget && !isStartTimer) {
+      console.log('start timer');
+      setIsStartTimer(true);
+      setCountTimer(startTimer());
     }
   };
 
-  const dragOverHandler = (e: React.DragEvent<HTMLDivElement>): void => {};
-
-  const dragLeaveHandler = (e: React.DragEvent<HTMLDivElement>): void => {};
+  const dragLeaveHandler = (e: React.DragEvent<HTMLDivElement>): void => {
+    if (countTimer !== null) {
+      console.log('стоп таймер');
+      setIsStartTimer(false);
+      clearTimeout(countTimer);
+      setCountTimer(null);
+    }
+  };
 
   return (
     <ModalContainer
       onClick={handleClick}
       onDragOver={(e) => dragOverHandler(e)}
       onDragLeave={(e) => dragLeaveHandler(e)}
-      style={{
-        zIndex: `${zIndex}`,
-      }}
-      aria-modal="true"
     >
       {childs}
     </ModalContainer>

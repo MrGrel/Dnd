@@ -36,7 +36,7 @@ export const Folder = styled.div`
 export const CardContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 5px;
   width: 100%;
   height: calc(100% - 30px);
   overflow: hidden;
@@ -58,20 +58,6 @@ export const Card = styled.div`
   color: #000000;
   transition: background-color 0.3s ease-in-out, border-color 1s ease-in-out,
     box-shadow 1s ease-in-out;
-`;
-
-export const IconContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  padding: 5px;
-  gap: 5px;
-  width: 100%;
-  height: calc(100% - 30px);
-  overflow: hidden;
-
-  &:hover {
-    overflow-y: scroll;
-  }
 `;
 
 export const Icon = styled.div`

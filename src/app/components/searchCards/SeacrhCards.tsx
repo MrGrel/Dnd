@@ -3,6 +3,14 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { ICard } from '../Dnd';
 import { FieldValue } from '../../../../../inmind/inmind-course-editor/src/infra/firebase/firestore';
 import { log } from 'console';
+import {
+  FormContainer,
+  Form,
+  Input,
+  ButtonSubmit,
+  FastButtonsContainer,
+  FastButtons,
+} from './SearchCards.style';
 
 interface ISercheCard {
   cardTree: ICard;
@@ -13,7 +21,7 @@ interface IInputs {
   serchCard: string;
 }
 
-export const SeacrhCards = ({ cardTree }: ISercheCard) => {
+export const SeacrhCards = ({ cardTree, setModalTrees }: ISercheCard) => {
   const {
     register,
     handleSubmit,
@@ -31,7 +39,22 @@ export const SeacrhCards = ({ cardTree }: ISercheCard) => {
   const onSubmit: SubmitHandler<IInputs> = (data) => {
     console.log(data);
 
+    const firstModalCard: ICard = {
+      id: 9999999,
+      title: `Результат поиска по: "${data.serchCard}"`,
+      floar: 9999999,
+      parent_id: null,
+      childrens: [],
+    };
+
     if (data.serchCard !== '') {
+      const serchMatches = cards?.filter((card) =>
+        card.title.includes(data.serchCard)
+      );
+      if (serchMatches.length > 0) {
+        firstModalCard.childrens = serchMatches;
+      }
+      setModalTrees((state) => [...state, firstModalCard]);
     }
   };
 
@@ -53,33 +76,41 @@ export const SeacrhCards = ({ cardTree }: ISercheCard) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <input
-        type="text"
-        {...register('serchCard', {
-          required: true,
-          onChange(e) {
-            setFastButtons([]);
-            const value = e.currentTarget.value;
-            if (value) {
-              const serchMatches = cards?.filter((card) =>
-                card.title.includes(value)
-              );
+    <FormContainer>
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <Input
+          type="text"
+          {...register('serchCard', {
+            required: true,
+            onChange(e) {
+              setFastButtons([]);
+              const value = e.currentTarget.value;
+              if (value) {
+                const serchMatches = cards?.filter((card) =>
+                  card.title.includes(value)
+                );
 
-              if (serchMatches?.length) {
-                setFastButtons(serchMatches);
+                if (serchMatches?.length) {
+                  setFastButtons(serchMatches);
+                }
               }
-            }
-          },
-        })}
-      />
-      <button type="submit">Поиск</button>
-      {fastButtons.length > 0 &&
-        fastButtons.map((button, index) => (
-          <button key={index} onClick={(e) => handleOnclick(button.title)}>
-            {button.title}
-          </button>
-        ))}
-    </form>
+            },
+          })}
+        />
+        <ButtonSubmit type="submit">Поиск</ButtonSubmit>
+        {fastButtons.length > 0 && (
+          <FastButtonsContainer>
+            {fastButtons.map((button, index) => (
+              <FastButtons
+                key={index}
+                onClick={(e) => handleOnclick(button.title)}
+              >
+                {button.title}
+              </FastButtons>
+            ))}
+          </FastButtonsContainer>
+        )}
+      </Form>
+    </FormContainer>
   );
 };

@@ -9,7 +9,6 @@ import {
   FirstCard,
   Folder,
   Icon,
-  IconContainer,
   TextContainer,
 } from './Card.style';
 import { log } from 'console';
@@ -88,18 +87,6 @@ export const Dnd = () => {
   const [modalTrees, setModalTrees] = useState<ICard[]>([]);
   const [isClose, setIsClose] = useState<boolean>(false);
 
-  const timeToDiveFolder = useCallback(
-    (card: ICard, targetStyle: CSSStyleDeclaration) => {
-      return setTimeout(() => {
-        setIsDiveFolder(true);
-        if (currentCard && card.floar >= currentCard.floar) {
-          targetStyle.backgroundColor = 'rgba(210, 220, 255, .2)';
-        }
-      }, 1500);
-    },
-    [diveFolder]
-  );
-
   const dragOverHandler = (e: DragEvent<HTMLDivElement>, card: ICard): void => {
     e.preventDefault();
     e.stopPropagation();
@@ -107,7 +94,8 @@ export const Dnd = () => {
     if (card !== diveFolder && currentCard !== card) {
       const targetStyle = e.currentTarget.style;
       targetStyle.borderColor = '#b4c4f8';
-      targetStyle.boxShadow = '2px 2px 2px #b4c4f8';
+      targetStyle.boxShadow =
+        '2px 2px 2px hsl(225.88235294117646, 82.9268292682927%, 83.92156862745098%)';
       targetStyle.backgroundColor = '';
 
       setDiveFolder(card);
@@ -233,6 +221,15 @@ export const Dnd = () => {
     setDiveFolder(null);
   };
 
+  const timeToDiveFolder = (card: ICard, targetStyle: CSSStyleDeclaration) => {
+    return setTimeout(() => {
+      setIsDiveFolder(true);
+      if (currentCard && card.floar >= currentCard.floar) {
+        targetStyle.backgroundColor = 'rgba(210, 220, 255, .2)';
+      }
+    }, 1500);
+  };
+
   const handleClick = (card: ICard) => {
     setModalTrees((state) => [...state, card]);
   };
@@ -289,7 +286,7 @@ export const Dnd = () => {
     return folder;
   };
 
-  const buildCardsTree = (card: ICard, index = 0, isDraggable = 3) => {
+  const buildCardsTree = (card: ICard, index = 0, isDraggable = 0) => {
     const contentFolderAndCard: JSX.Element = (
       <>
         <TextContainer>
@@ -322,7 +319,7 @@ export const Dnd = () => {
     );
 
     const folderCard: JSX.Element =
-      isDraggable > 3 ? (
+      isDraggable < 99999 ? (
         <Folder
           key={card.id}
           onDragOver={(e: DragEvent<HTMLDivElement>) =>
@@ -345,7 +342,7 @@ export const Dnd = () => {
       );
 
     const cardInFolder: JSX.Element =
-      isDraggable > 3 ? (
+      isDraggable < 99999 ? (
         <Card
           key={card.id}
           onDragOver={(e: DragEvent<HTMLDivElement>) =>
@@ -368,7 +365,7 @@ export const Dnd = () => {
       );
 
     const iconCard: JSX.Element =
-      isDraggable > 3 ? (
+      isDraggable < 99999 ? (
         <Icon
           key={card.id}
           onDragOver={(e: DragEvent<HTMLDivElement>) =>
@@ -426,7 +423,11 @@ export const Dnd = () => {
       {htmlTreeOfCards}
       {modalTrees.length !== 0 && (
         <ModalWindow
-          childs={buildCardsTree(modalTrees[modalTrees.length - 1])}
+          childs={buildCardsTree(
+            modalTrees[modalTrees.length - 1],
+            0,
+            modalTrees[modalTrees.length - 1].id
+          )}
           modals={modalTrees}
           removeModal={setModalTrees}
           modalClose={isClose}

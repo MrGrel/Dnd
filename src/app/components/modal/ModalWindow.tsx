@@ -21,8 +21,6 @@ export const ModalWindow = ({
 
   const startTimer = () => {
     return setTimeout(() => {
-      console.log('end timer');
-
       if (modals.length === 1) {
         removeModal((state) => []);
       } else {
@@ -52,14 +50,12 @@ export const ModalWindow = ({
   };
   const dragOverHandler = (e: React.DragEvent<HTMLDivElement>): void => {
     if (e.target === e.currentTarget && countTimer === null) {
-      console.log('start timer');
       setCountTimer(startTimer());
     }
   };
 
   const dragLeaveHandler = (e: React.DragEvent<HTMLDivElement>): void => {
     if (countTimer !== null) {
-      console.log('стоп таймер');
       clearTimeout(countTimer);
       setCountTimer(null);
     }

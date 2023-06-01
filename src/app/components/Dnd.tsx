@@ -203,7 +203,6 @@ export const Dnd = () => {
 
     if (modalTrees.length !== 0) {
       const lastModalCard = modalTrees[modalTrees.length - 1];
-      console.log(modalTrees);
 
       if (
         lastModalCard.id === folderForDrop.id ||

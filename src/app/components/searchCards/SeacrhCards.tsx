@@ -37,8 +37,6 @@ export const SeacrhCards = ({ cardTree, setModalTrees }: ISercheCard) => {
   const [fastButtons, setFastButtons] = useState<ICard[]>([]);
 
   const onSubmit: SubmitHandler<IInputs> = (data) => {
-    console.log(data);
-
     const firstModalCard: ICard = {
       id: 9999999,
       title: `Результат поиска по: "${data.serchCard}"`,

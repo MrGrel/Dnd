@@ -13,6 +13,7 @@ import {
   TextContainer,
 } from './Card.style';
 import { log } from 'console';
+import { SeacrhCards } from './searchCards/SeacrhCards';
 
 export interface ICard {
   id: number;
@@ -84,7 +85,7 @@ export const Dnd = () => {
   const [isDiveFolder, setIsDiveFolder] = useState<boolean>(false);
   const [diveFolder, setDiveFolder] = useState<ICard | null>(null);
   const [countTimer, setCountTimer] = useState<NodeJS.Timeout | null>(null);
-  const [modalTrees, setModalTrees] = useState<ICard[][]>([]);
+  const [modalTrees, setModalTrees] = useState<ICard[]>([]);
   const [isClose, setIsClose] = useState<boolean>(false);
 
   const timeToDiveFolder = useCallback(
@@ -213,7 +214,7 @@ export const Dnd = () => {
     }
 
     if (modalTrees.length !== 0) {
-      const lastModalCard = modalTrees[modalTrees.length - 1][0];
+      const lastModalCard = modalTrees[modalTrees.length - 1];
       console.log(modalTrees);
 
       if (
@@ -222,7 +223,7 @@ export const Dnd = () => {
       ) {
         setModalTrees((state) => [...state]);
       } else {
-        setModalTrees((state) => [...state, [folderForDrop]]);
+        setModalTrees((state) => [...state, folderForDrop]);
       }
     }
 
@@ -233,7 +234,7 @@ export const Dnd = () => {
   };
 
   const handleClick = (card: ICard) => {
-    setModalTrees((state) => [...state, [card]]);
+    setModalTrees((state) => [...state, card]);
   };
 
   const swapCard = (
@@ -288,10 +289,41 @@ export const Dnd = () => {
     return folder;
   };
 
-  const buildCardsTree = (arr: ICard[], index = 0) => {
-    if (index === 2) {
-      return arr.map((card: ICard) => (
-        <Icon
+  const buildCardsTree = (card: ICard, index = 0, isDraggable = 3) => {
+    const contentFolderAndCard: JSX.Element = (
+      <>
+        <TextContainer>
+          <Button
+            onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+              handleClick(card)
+            }
+          >
+            {card.title}
+          </Button>
+        </TextContainer>
+
+        <CardContainer>
+          {card.childrens.length > 0 &&
+            card.childrens.map((card) =>
+              buildCardsTree(card, index + 1, isDraggable - 1)
+            )}
+        </CardContainer>
+      </>
+    );
+
+    const contentIconCard: JSX.Element = (
+      <Button
+        onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+          handleClick(card)
+        }
+      >
+        {card.title}
+      </Button>
+    );
+
+    const folderCard: JSX.Element =
+      isDraggable > 3 ? (
+        <Folder
           key={card.id}
           onDragOver={(e: DragEvent<HTMLDivElement>) =>
             dragOverHandler(e, card)
@@ -306,18 +338,14 @@ export const Dnd = () => {
           onDrop={(e: DragEvent<HTMLDivElement>) => dropHandler(e, card)}
           draggable={true}
         >
-          <Button
-            onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
-              handleClick(card)
-            }
-          >
-            {card.title}
-          </Button>
-        </Icon>
-      ));
-    }
-    if (index === 1) {
-      return arr.map((card: ICard) => (
+          {contentFolderAndCard}
+        </Folder>
+      ) : (
+        <Folder key={card.id}>{contentFolderAndCard}</Folder>
+      );
+
+    const cardInFolder: JSX.Element =
+      isDraggable > 3 ? (
         <Card
           key={card.id}
           onDragOver={(e: DragEvent<HTMLDivElement>) =>
@@ -333,53 +361,46 @@ export const Dnd = () => {
           onDrop={(e: DragEvent<HTMLDivElement>) => dropHandler(e, card)}
           draggable={true}
         >
-          <TextContainer>
-            <Button
-              onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
-                handleClick(card)
-              }
-            >
-              {card.title}
-            </Button>
-          </TextContainer>
-          <IconContainer>
-            {card.childrens.length > 0 &&
-              buildCardsTree(card.childrens, index + 1)}
-          </IconContainer>
+          {contentFolderAndCard}
         </Card>
-      ));
+      ) : (
+        <Card key={card.id}>{contentFolderAndCard}</Card>
+      );
+
+    const iconCard: JSX.Element =
+      isDraggable > 3 ? (
+        <Icon
+          key={card.id}
+          onDragOver={(e: DragEvent<HTMLDivElement>) =>
+            dragOverHandler(e, card)
+          }
+          onDragLeave={(e: DragEvent<HTMLDivElement>) =>
+            dragLeaveHandler(e, card)
+          }
+          onDragStart={(e: DragEvent<HTMLDivElement>) =>
+            dragStartHandler(e, card)
+          }
+          onDragEnd={(e: DragEvent<HTMLDivElement>) => dragEndHandler(e, card)}
+          onDrop={(e: DragEvent<HTMLDivElement>) => dropHandler(e, card)}
+          draggable={true}
+        >
+          {contentIconCard}
+        </Icon>
+      ) : (
+        <Icon key={card.id}>{contentIconCard}</Icon>
+      );
+
+    let VariableCard: React.JSX.Element;
+
+    if (index === 2) {
+      VariableCard = iconCard;
+    } else if (index === 1) {
+      VariableCard = cardInFolder;
+    } else {
+      VariableCard = folderCard;
     }
 
-    return arr.map((card: ICard) => (
-      <Folder
-        key={card.id}
-        onDragOver={(e: DragEvent<HTMLDivElement>) => dragOverHandler(e, card)}
-        onDragLeave={(e: DragEvent<HTMLDivElement>) =>
-          dragLeaveHandler(e, card)
-        }
-        onDragStart={(e: DragEvent<HTMLDivElement>) =>
-          dragStartHandler(e, card)
-        }
-        onDragEnd={(e: DragEvent<HTMLDivElement>) => dragEndHandler(e, card)}
-        onDrop={(e: DragEvent<HTMLDivElement>) => dropHandler(e, card)}
-        draggable={true}
-      >
-        <TextContainer>
-          <Button
-            onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
-              handleClick(card)
-            }
-          >
-            {card.title}
-          </Button>
-        </TextContainer>
-
-        <CardContainer>
-          {card.childrens.length > 0 &&
-            buildCardsTree(card.childrens, index + 1)}
-        </CardContainer>
-      </Folder>
-    ));
+    return VariableCard;
   };
 
   const htmlTreeOfCards = useMemo(() => {
@@ -393,28 +414,15 @@ export const Dnd = () => {
         }
         onDrop={(e: DragEvent<HTMLDivElement>) => dropHandler(e, treeOfCards)}
       >
-        {buildCardsTree(treeOfCards.childrens)}
+        {treeOfCards.childrens.length &&
+          treeOfCards.childrens.map((childs) => buildCardsTree(childs))}
       </FirstCard>
     );
   }, [currentCard, treeOfCards, isDiveFolder, diveFolder]);
 
-  const htmlTreeOfModal = useMemo(() => {
-    console.log('я ща обнов');
-
-    if (modalTrees.length === 0) return null;
-    return (
-      <ModalWindow
-        childs={buildCardsTree(modalTrees[modalTrees.length - 1])}
-        modals={modalTrees}
-        removeModal={setModalTrees}
-        modalClose={isClose}
-        setIsClose={setIsClose}
-      ></ModalWindow>
-    );
-  }, [modalTrees]);
-
   return (
     <Container>
+      <SeacrhCards setModalTrees={setModalTrees} cardTree={treeOfCards} />
       {htmlTreeOfCards}
       {modalTrees.length !== 0 && (
         <ModalWindow
